@@ -26,9 +26,11 @@ MIFAREReader = MFRC522.MFRC522()
 
 def connect_mysql(uid_str1):
     conn = mysql.connector.connect(user='root', password='root', database='epay', use_unicode=True)
-    cursor   = conn.cursor()
-    cursor.execute('select * from commodity_detail where uid = %s',(uid_str1,))
-    cursor.execute('INSERT INTO commodity(name, price, uid)SELECT %s FROM commodity WHERE not exists (select * from commodity where uid = %s); ',[values,uid_str1])
+    cursor = conn.cursor()
+    
+    cursor.execute('select name,price,uid from commodity_detail where uid = %s',(uid_str1,))
+    
+    cursor.execute('INSERT INTO commodity(name,price,uid) SELECT %s FROM commodity WHERE not exists (select * from commodity where uid = %s); ',(cursor.fetchone(),uid_str1,))
 
     conn.commit()
     cursor.close()
