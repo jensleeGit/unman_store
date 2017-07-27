@@ -5,6 +5,93 @@ import RPi.GPIO as GPIO
 import MFRC522
 import signal
 import mysql.connector
+from sqlalchemy import Column, Integer,String, create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+
+#############################################################################################
+#sql
+
+# 创建对象的基类:
+Base = declarative_base()
+
+
+# 初始化数据库连接:
+engine = create_engine('mysql+mysqlconnector://root:root@localhost:3306/epay')
+# 创建DBSession类型:
+DBSession = sessionmaker(bind=engine)
+
+class Detail(Base):
+    __tablename__ = 'commodity_detail'
+    id = Column(Integer,primary_key=True,autoincrement=True)
+    name = Column(String(20))
+    price =  Column(Integer)
+    uid =  Column(String(20))
+
+class Commo(Base):
+    __tablename__ = 'commodity'
+    id = Column(Integer,primary_key=True,autoincrement=True)
+    name = Column(String(20))
+    price =  Column(Integer)
+    uid =  Column(String(20))
+
+def if_uid_in_commodity():
+    # 创建Session:
+    session = DBSession()
+    # 创建Query查询，filter是where条件，最后调用one()返回唯一行，如果调用all()则返回所有行:
+    user = session.query(Commo).filter(Commo.uid==uid_str).first()
+    # 打印类型和对象的name属性:
+    if user:
+        pass
+    else:
+        user = session.query(Detail).fliter(Detail.uid==uid_str).first()
+        global name
+        global price
+
+        #g_name = user.name
+        #g_price = user.price
+    
+        new_user = Commo( name=user.name,price=user.price,uid=uid_str)
+        # 添加到session:
+        session.add(new_user)
+        # 提交即保存到数据库:
+        session.commit()
+
+    # 关闭Session:
+    session.close()
+
+def if_uid_in_commodity(uid_str):
+    # 创建Session:
+    session = DBSession()
+    # 创建Query查询，filter是where条件，最后调用one()返回唯一行，如果调用all()则返回所有行:
+    user = session.query(Commo).filter(Commo.uid==uid_str).first()
+    # 打印类型和对象的name属性:
+    if user:
+        session.close()
+    else:
+        session.close()
+        insert_commodity()
+        
+def insert_commodity():
+    # 创建session对象:
+    session = DBSession()
+    # 创建新User对象:
+    user = session.query(Detail).filter(Detail.uid==uid_str).first()
+    global g_name
+    global g_price
+    
+    new_user = Commo( name=user.name,price=user.price,uid=uid_str)
+    # 添加到session:
+    session.add(new_user)
+    # 提交即保存到数据库:
+    session.commit()
+    # 关闭session:
+    session.close() 
+
+###########################################################################################
+#rfid
+
 
 continue_reading = True
 
@@ -21,23 +108,10 @@ signal.signal(signal.SIGINT, end_read)
 # Create an object of the class MFRC522
 MIFAREReader = MFRC522.MFRC522()
 
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-
-def connect_mysql(uid_str1):
-    conn = mysql.connector.connect(user='root', password='root', database='epay', use_unicode=True)
-    cursor = conn.cursor()
-    
-    cursor.execute('select name,price,uid from commodity_detail where uid = %s',(uid_str1,))
-    
-    cursor.execute('INSERT INTO commodity(name,price,uid) SELECT %s FROM commodity WHERE not exists (select * from commodity where uid = %s); ',(cursor.fetchone(),uid_str1,))
-
-    conn.commit()
-    cursor.close()
-
 
 
 # Welcome message
+print "欢迎来到E-pay无人售货店"
 print "Press Ctrl-C to stop."
 
 # This loop keeps checking for chips. If one is near it will get the UID and authenticate
@@ -61,5 +135,5 @@ while continue_reading:
 
         uid_str = str(uid[0]) + str(uid[1]) + str(uid[2]) + str(uid[3])
 
-        connect_mysql(uid_str)
+        if_uid_in_commodity(uid_str)
         
