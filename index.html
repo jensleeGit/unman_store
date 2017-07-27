@@ -1,0 +1,62 @@
+<html>
+ <head> 
+  <meta charset="utf-8" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+  <title>E-pay</title> 
+  <link href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" type="text/css" /> 
+  <link href="css/styles.css" rel="stylesheet" /> 
+ </head> 
+ <body> 
+  <div class="col-sm-1 col-sm-offset-5 col-lg-12 col-lg-offset-2 main"> 
+   <div class="row"> 
+    <div class="col-md-8"> 
+	 
+     <div class="panel panel-default"> 
+	  <center><h1>购物清单</h1></center>
+      <div class="panel-body" id="timingboard"> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script> 
+  <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script> 
+  <script>
+	/*加载页面时刷新*/
+	window.onload = function(){
+		flush();
+	};
+	/*刷新函数*/
+	function flush(){ 
+		$.ajax( {
+			type : "post",
+			dataType : "json",
+			url : './getdata.php',       
+			success : function(data) {       
+				$('#timingboard').empty();
+				if(data.name != null){
+					var sum_price = 0.0;
+					var str = '<table class="table table-striped table-bordered bootstrap-datatable datatable"><thead><tr><th>操作</th><th>价格</th></tr></thead><tbody>';
+					for(var i = 0; i < data.name.length; i++){
+						str += '<tr>';
+						str += '<td id="a' + i +'">' + data.name[i] + '</td>';
+						str += '<td id="b' + i +'">' + data.price[i] + '</td>';
+						sum_price += parseFloat(data.price[i]);
+						str += "</tr>";
+					}
+					
+					str += '<tr>';
+					str += '<td>' + "总价" + '</td>';
+					str += '<td>' + sum_price + '元</td>';
+					str += "</tr>";
+					
+					str += '</tbody></table>';
+					$('#timingboard').append(str);
+				}
+			}
+		});
+	} 
+	window.setInterval(flush, 2000); 
+	</script>   
+ </body>
+</html>
