@@ -98,8 +98,8 @@ def delete_commodity():
 ###########################################################################################
 #rfid
 
-global card_detected
-card_detected = 0
+global card_detect
+card_detect = 0
 
 continue_reading = True
 
@@ -131,7 +131,7 @@ while continue_reading:
     # If a card is found
     if status == MIFAREReader.MI_OK:
         print "Card detected"
-        card_detected = 1
+        card_detect = 1
     # Get the UID of the card
     (status,uid) = MIFAREReader.MFRC522_Anticoll()
 
@@ -143,11 +143,7 @@ while continue_reading:
 
         uid_str = str(uid[0]) + str(uid[1]) + str(uid[2]) + str(uid[3])
 
-    if card_detected == 1:
+    if card_detect == 1:
         if_uid_in_commodity(uid_str)
-    elif card_detetcted ==0 :    
+    elif card_detetct ==0 :    
         delete_commodity()
-    
-    
-        
- 
