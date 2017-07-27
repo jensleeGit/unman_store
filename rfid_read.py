@@ -4,6 +4,7 @@
 import RPi.GPIO as GPIO
 import MFRC522
 import signal
+import time
 import mysql.connector
 from sqlalchemy import Column, Integer,String, create_engine
 from sqlalchemy.orm import sessionmaker
@@ -45,7 +46,7 @@ def if_uid_in_commodity():
     if user:
         pass
     else:
-        user = session.query(Detail).fliter(Detail.uid==uid_str).first()
+        user = session.query(Detail).filter(Detail.uid==uid_str).first()
         global name
         global price
 
@@ -124,7 +125,7 @@ print "Press Ctrl-C to stop."
 
 # This loop keeps checking for chips. If one is near it will get the UID and authenticate
 while continue_reading:
-    card_detected = 0
+    card_detect = 0
     # Scan for cards    
     (status,TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
 
@@ -145,5 +146,10 @@ while continue_reading:
 
     if card_detect == 1:
         if_uid_in_commodity(uid_str)
-    elif card_detetct ==0 :    
+        time.sleep(1)
+    elif card_detect ==0 :    
         delete_commodity()
+    
+    
+        
+ 
