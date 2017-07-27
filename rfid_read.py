@@ -89,9 +89,17 @@ def insert_commodity():
     # 关闭session:
     session.close() 
 
+def delete_commodity():
+    conn = mysql.connector.connect(user='root', password='root', database='epay', use_unicode=True)
+    cursor = conn.cursor()
+    cursor.execute('TRUNCATE TABLE commodity')
+    cursor.close()
+    conn.close()
 ###########################################################################################
 #rfid
 
+global card_detected
+card_detected = 0
 
 continue_reading = True
 
@@ -116,14 +124,14 @@ print "Press Ctrl-C to stop."
 
 # This loop keeps checking for chips. If one is near it will get the UID and authenticate
 while continue_reading:
-    
+    card_detected = 0
     # Scan for cards    
     (status,TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
 
     # If a card is found
     if status == MIFAREReader.MI_OK:
         print "Card detected"
-    
+        card_detected = 1
     # Get the UID of the card
     (status,uid) = MIFAREReader.MFRC522_Anticoll()
 
@@ -135,5 +143,11 @@ while continue_reading:
 
         uid_str = str(uid[0]) + str(uid[1]) + str(uid[2]) + str(uid[3])
 
+    if card_detected == 1:
         if_uid_in_commodity(uid_str)
+    elif card_detetcted ==0 :    
+        delete_commodity()
+    
+    
         
+ 
